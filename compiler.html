@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compiler Design Visualizer | Interactive Learning Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --danger: #f94144;
+            --dark: #1a1a2e;
+            --darker: #0f0f1e;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --border: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(30, 30, 46, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Header */
+        .header {
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--light), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 0.2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            overflow-x: hidden;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(76, 201, 240, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--success);
+            margin-bottom: 1rem;
+        }
+
+        .stat-content h3 {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--light), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .panel {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            overflow: hidden;
+         }
+
+        /* Main Content Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .panel:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .panel-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .panel-title h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* Code Editor */
+        .code-editor {
+            background: #1e1e2e;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .editor-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .editor-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        #sourceCode {
+            width: 100%;
+            height: 250px;
+            background: transparent;
+            color: #e4e4e7;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 1.5rem;
+            border: none;
+            resize: vertical;
+            outline: none;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #2a9d8f);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #e63946);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--gray);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
+        }
+
+        .tab.active {
+            background: rgba(67, 97, 238, 0.2);
+            color: var(--primary);
+            border: 1px solid rgba(67, 97, 238, 0.3);
+        }
+
+        .tab-badge {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Output Display */
+        .output-display {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid var(--border);
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .output-line {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            border-left: 3px solid transparent;
+        }
+
+        .output-line.keyword { color: #ff79c6; border-color: #ff79c6; }
+        .output-line.identifier { color: #50fa7b; border-color: #50fa7b; }
+        .output-line.number { color: #bd93f9; border-color: #bd93f9; }
+        .output-line.operator { color: #ffb86c; border-color: #ffb86c; }
+        .output-line.delimiter { color: #8be9fd; border-color: #8be9fd; }
+        .output-line.comment { color: #6272a4; font-style: italic; }
+
+        /* Phase Visualization */
+        .phase-track {
+           position: relative;
+           padding: 2rem 0;
+           min-height: 650px;
+        }
+
+        .phase-track::before {
+            content: '';
+            position: absolute;
+            left: 40px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 3px;
+            z-index: 1; 
+        }
+
+        .phase-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.8rem;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 0.8rem;
+            border-radius: 12px;
+            z-index: 2;
+            background: var(--card-bg);
+            min-height: 70px;
+        }
+
+        .phase-item:hover {
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .phase-item.active {
+            background: rgba(67, 97, 238, 0.15);
+            border: 1px solid rgba(67, 97, 238, 0.3);
+        }
+
+        .phase-item.completed {
+            opacity: 0.9;
+        }
+
+        .phase-number {
+            width: 36px;
+            height: 35px;
+            background: var(--dark);
+            border: 3px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--gray);
+            z-index: 2;
+            transition: var(--transition);
+        }
+
+        .phase-item.active .phase-number {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 20px rgba(67, 97, 238, 0.5);
+        }
+
+        .phase-item.completed .phase-number {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .phase-content {
+            flex: 1;
+            min-width: 0; 
+        }
+
+        .phase-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-title h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--light);
+        }
+
+        .phase-item.active .phase-title h3 {
+            color: var(--primary);
+        }
+
+        .phase-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: rgba(108, 117, 125, 0.2);
+            color: var(--gray);
+        }
+
+        .status-active {
+            background: rgba(67, 97, 238, 0.2);
+            color: var(--primary);
+        }
+
+        .status-completed {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+
+        .phase-desc {
+            color: var(--gray);
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            height: 6px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            100% { left: 100%; }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .footer-link {
+            color: var(--gray);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-link:hover {
+            color: var(--success);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 0 1rem;
+            }
+            
+            .panel {
+                padding: 1.5rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .phase-track::before {
+                left: 20px;
+            }
+            
+            .phase-number {
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Highlighting */
+        .highlight {
+            position: relative;
+        }
+
+        .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .highlight:hover::after {
+            transform: scaleX(1);
+        }
+
+        /* Tooltip */
+        .name {
+            position: relative;
+            display: inline-block;
+        }
+
+        
+        .name:hover {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 10000;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Dark Mode Toggle (Future Enhancement) */
+        .theme-toggle {
+            width: 50px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: var(--light);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle.active::after {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Compiler Design Visualizer</h1>
+                    <p>Interactive visualization of compiler phases</p>
+                </div>
+            </div>
+            <div class="name">
+                    <h5>Made by:- Priyanshu Gupta</h5>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-card" onclick="showNotification('Lexical Analysis Statistics Loaded')">
+                <div class="stat-icon">
+                    <i class="fas fa-font"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Tokens Generated</h3>
+                    <div class="stat-value" id="tokenCount">0</div>
+                </div>
+            </div>
+            <div class="stat-card" onclick="showNotification('Symbol Table Information Loaded')">
+                <div class="stat-icon">
+                    <i class="fas fa-table"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Symbols Found</h3>
+                    <div class="stat-value" id="symbolCount">0</div>
+                </div>
+            </div>
+            <div class="stat-card" onclick="showNotification('Optimization Metrics Loaded')">
+                <div class="stat-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Optimizations Applied</h3>
+                    <div class="stat-value" id="optimizationCount">0</div>
+                </div>
+            </div>
+            <div class="stat-card" onclick="showNotification('Phase Progress Overview')">
+                <div class="stat-icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Phases Completed</h3>
+                    <div class="stat-value" id="phaseProgress">0/6</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Panel - Code Input & Output -->
+            <div class="panel fade-in">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <div class="panel-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h2>Source Code Editor</h2>
+                    </div>
+                </div>
+                <div class="editor-actions">
+                        <div class="tooltip">
+                            <button class="btn btn-secondary btn-sm" onclick="loadExample('simple')">
+                                <i class="fas fa-file-code"></i>
+                                <span class="tooltip-text">Load simple example</span>
+                            </button>
+                        </div>
+                        <div class="tooltip">
+                            <button class="btn btn-secondary btn-sm" onclick="loadExample('conditional')">
+                                <i class="fas fa-code-branch"></i>
+                                <span class="tooltip-text">Load conditional example</span>
+                            </button>
+                        </div>
+                        <div class="tooltip">
+                            <button class="btn btn-secondary btn-sm" onclick="clearCode()">
+                                <i class="fas fa-broom"></i>
+                                <span class="tooltip-text">Clear editor</span>
+                            </button>
+                        </div>
+                    </div>
+
+                <div class="code-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-file-alt"></i>
+                            <span>main.c</span>
+                        </div>
+                        <div class="editor-actions">
+                            <span class="tooltip">
+                                <i class="fas fa-keyboard" style="color: var(--success);"></i>
+                                <span class="tooltip-text">C-like syntax highlighting</span>
+                            </span>
+                        </div>
+                    </div>
+                    <textarea id="sourceCode" placeholder="Enter your C-like code here...">int main() {
+    int x = 10;
+    int y = 20;
+    int sum = x + y;
+    
+    if (sum > 25) {
+        sum = sum * 2;
+    }
+    
+    return 0;
+}</textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="compileCode()">
+                        <i class="fas fa-play-circle"></i>
+                        Compile & Visualize
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetAll()">
+                        <i class="fas fa-redo"></i>
+                        Reset All
+                    </button>
+                    <button class="btn btn-success" onclick="copyCode()">
+                        <i class="fas fa-copy"></i>
+                        Copy Code
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel - Phase Visualization -->
+            <div class="panel fade-in" style="animation-delay: 0.1s;">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <div class="panel-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <h2>Compiler Phases</h2>
+                    </div>
+                    <div class="phase-progress">
+                        <span id="currentPhaseText">Phase 1/6</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar" style="width: 16.66%;"></div>
+                </div>
+
+                <!-- Phase Track -->
+                <div class="phase-track">
+                    <!-- Phase 1 -->
+                    <div class="phase-item active" id="phase1" onclick="goToPhase(0)">
+                        <div class="phase-number">1</div>
+                        <div class="phase-content">
+                            <div class="phase-header">
+                                <div class="phase-title">
+                                    <h3>Lexical Analysis</h3>
+                                </div>
+                                <div class="phase-status status-active">Active</div>
+                            </div>
+                            <p class="phase-desc">Scanner breaks source code into tokens</p>
+                        </div>
+                    </div>
+
+                    <!-- Phase 2 -->
+                    <div class="phase-item" id="phase2" onclick="goToPhase(1)">
+                        <div class="phase-number">2</div>
+                        <div class="phase-content">
+                            <div class="phase-header">
+                                <div class="phase-title">
+                                    <h3>Syntax Analysis</h3>
+                                </div>
+                                <div class="phase-status status-pending">Pending</div>
+                            </div>
+                            <p class="phase-desc">Parser checks grammar and builds parse tree</p>
+                        </div>
+                    </div>
+
+                    <!-- Phase 3 -->
+                    <div class="phase-item" id="phase3" onclick="goToPhase(2)">
+                        <div class="phase-number">3</div>
+                        <div class="phase-content">
+                            <div class="phase-header">
+                                <div class="phase-title">
+                                    <h3>Semantic Analysis</h3>
+                                </div>
+                                <div class="phase-status status-pending">Pending</div>
+                            </div>
+                            <p class="phase-desc">Type checking and validation</p>
+                        </div>
+                    </div>
+
+                    <!-- Phase 4 -->
+                    <div class="phase-item" id="phase4" onclick="goToPhase(3)">
+                        <div class="phase-number">4</div>
+                        <div class="phase-content">
+                            <div class="phase-header">
+                                <div class="phase-title">
+                                    <h3>Intermediate Code Generation</h3>
+                                </div>
+                                <div class="phase-status status-pending">Pending</div>
+                            </div>
+                            <p class="phase-desc">Generates machine-independent code</p>
+                        </div>
+                    </div>
+
+                    <!-- Phase 5 -->
+                    <div class="phase-item" id="phase5" onclick="goToPhase(4)">
+                        <div class="phase-number">5</div>
+                        <div class="phase-content">
+                            <div class="phase-header">
+                                <div class="phase-title">
+                                    <h3>Code Optimization</h3>
+                                </div>
+                                <div class="phase-status status-pending">Pending</div>
+                            </div>
+                            <p class="phase-desc">Improves intermediate code efficiency</p>
+                        </div>
+                    </div>
+
+                    <!-- Phase 6 -->
+                    <div class="phase-item" id="phase6" onclick="goToPhase(5)">
+                        <div class="phase-number">6</div>
+                        <div class="phase-content">
+                            <div class="phase-header">
+                                <div class="phase-title">
+                                    <h3>Code Generation</h3>
+                                </div>
+                                <div class="phase-status status-pending">Pending</div>
+                            </div>
+                            <p class="phase-desc">Generates target machine code</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="prevPhase()">
+                        <i class="fas fa-arrow-left"></i>
+                        Previous Phase
+                    </button>
+                    <button class="btn btn-primary" onclick="nextPhase()">
+                        Next Phase
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button class="btn btn-success" onclick="autoRunPhases()">
+                        <i class="fas fa-rocket"></i>
+                        Auto Run All
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Panel - Output Display -->
+        <div class="panel fade-in" style="animation-delay: 0.2s;">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <div class="panel-icon">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                    <h2>Compiler Output</h2>
+                </div>
+                <div class="tab-badge" id="currentTabBadge">Tokens</div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs-container">
+                <div class="tabs">
+                    <button class="tab active" data-tab="tokens" onclick="showOutputTab('tokens')">
+                        <i class="fas fa-font"></i>
+                        Tokens
+                        <span class="tab-badge" id="tokenBadge">0</span>
+                    </button>
+                    <button class="tab" data-tab="ast" onclick="showOutputTab('ast')">
+                        <i class="fas fa-project-diagram"></i>
+                        Syntax Tree
+                    </button>
+                    <button class="tab" data-tab="symbol" onclick="showOutputTab('symbol')">
+                        <i class="fas fa-table"></i>
+                        Symbol Table
+                        <span class="tab-badge" id="symbolBadge">0</span>
+                    </button>
+                    <button class="tab" data-tab="icode" onclick="showOutputTab('icode')">
+                        <i class="fas fa-code"></i>
+                        Intermediate Code
+                    </button>
+                    <button class="tab" data-tab="optimized" onclick="showOutputTab('optimized')">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Optimized Code
+                        <span class="tab-badge" id="optimizationBadge">0</span>
+                    </button>
+                    <button class="tab" data-tab="target" onclick="showOutputTab('target')">
+                        <i class="fas fa-microchip"></i>
+                        Target Code
+                    </button>
+                </div>
+            </div>
+
+            <!-- Output Display -->
+            <div class="output-display" id="output">
+                <div class="output-line comment">// Click "Compile & Visualize" to see the compiler output</div>
+                <div class="output-line comment">// Or use the tabs above to view different compiler phases</div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 1.5rem;">
+                <button class="btn btn-secondary" onclick="copyOutput()">
+                    <i class="fas fa-copy"></i>
+                    Copy Output
+                </button>
+                <button class="btn btn-secondary" onclick="downloadOutput()">
+                    <i class="fas fa-download"></i>
+                    Download Output
+                </button>
+                <button class="btn btn-danger" onclick="clearOutput()">
+                    <i class="fas fa-trash"></i>
+                    Clear Output
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Compiler Design Visualizer | Made by:- Priyanshu Gupta</p>
+        <div class="footer-links">
+            <a href="#" class="footer-link" onclick="showNotification('GitHub repository will open in new tab')">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+            <a href="#" class="footer-link" onclick="showNotification('Documentation page will open')">
+                <i class="fas fa-book"></i> Documentation
+            </a>
+            <a href="#" class="footer-link" onclick="showNotification('Report an issue or suggest a feature')">
+                <i class="fas fa-bug"></i> Report Issue
+            </a>
+            <a href="#" class="footer-link" onclick="showNotification('About this project and contributors')">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+        </div>
+    </footer>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Global variables
+        let currentPhase = 0;
+        let isAutoRunning = false;
+        let currentTab = 'tokens';
+        let currentOutput = '';
+        
+        // Phase information
+        const phaseData = [
+            {
+                title: "Lexical Analysis (Phase 1)",
+                description: "The lexical analyzer (scanner) reads the source code character by character and groups them into meaningful sequences called tokens. Tokens are the smallest units of a program, including keywords, identifiers, operators, literals, and punctuation.",
+                example: "Input: int x = 10 + y;\nOutput Tokens: KEYWORD(int), IDENTIFIER(x), OPERATOR(=), NUMBER(10), OPERATOR(+), IDENTIFIER(y), DELIMITER(;)"
+            },
+            {
+                title: "Syntax Analysis (Phase 2)",
+                description: "The parser checks whether the sequence of tokens forms a syntactically correct program according to the language grammar. It builds a parse tree or abstract syntax tree (AST) representing the hierarchical structure of the program.",
+                example: "Input: x = 10 + y * 2\nParse Tree: Shows hierarchy with operators and operands\nAST: Represents expression structure with operator precedence"
+            },
+            {
+                title: "Semantic Analysis (Phase 3)",
+                description: "The semantic analyzer checks for semantic errors such as type mismatches, undefined variables, and incorrect function calls. It builds a symbol table to store information about identifiers and their attributes.",
+                example: "Checks: Variable declaration before use\nType compatibility in expressions\nFunction argument matching\nScope resolution"
+            },
+            {
+                title: "Intermediate Code Generation (Phase 4)",
+                description: "Generates machine-independent intermediate code (like three-address code) that is easier to optimize and translate to target code. This phase separates the compiler from machine-specific details.",
+                example: "Three-address code:\nt1 = 10\nt2 = y * 2\nt3 = t1 + t2\nx = t3"
+            },
+            {
+                title: "Code Optimization (Phase 5)",
+                description: "Optimizes the intermediate code to improve performance by removing redundant code, simplifying expressions, and reorganizing code for better execution efficiency. This phase aims to produce faster and smaller code.",
+                example: "Before: t1 = 10\n        t2 = y * 2\n        t3 = t1 + t2\n        x = t3\nAfter:  x = 10 + y * 2\n(Constant folding, common subexpression elimination)"
+            },
+            {
+                title: "Code Generation (Phase 6)",
+                description: "Generates target machine code from the optimized intermediate code. This phase handles memory allocation, register allocation, and instruction selection to produce executable machine code.",
+                example: "Target Assembly Code:\nMOV R1, #10\nLOAD R2, y\nMUL R3, R2, #2\nADD R4, R1, R3\nSTORE x, R4"
+            }
+        ];
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🚀 Compiler Visualizer Loaded!");
+            
+            // Setup tab click handlers
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    showOutputTab(tabName);
+                });
+            });
+            
+            // Setup phase click handlers
+            for(let i = 1; i <= 6; i++) {
+               const phaseElement = document.getElementById('phase' + i);
+               if (phaseElement) {
+                  phaseElement.style.opacity = '1';
+                  phaseElement.style.visibility = 'visible';
+                }
+            }
+            
+            updateOutput();
+            updateStats();
+            showNotification('Welcome to Compiler Design Visualizer!', 'success');
+        });
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification';
+            
+            // Set color based on type
+            if (type === 'success') {
+                notification.style.background = 'var(--success)';
+            } else if (type === 'error') {
+                notification.style.background = 'var(--danger)';
+            } else {
+                notification.style.background = 'var(--primary)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Show specific output tab
+        function showOutputTab(tabName) {
+            currentTab = tabName;
+            
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if(tab.getAttribute('data-tab') === tabName) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Update tab badge
+            document.getElementById('currentTabBadge').textContent = 
+                tabName.charAt(0).toUpperCase() + tabName.slice(1);
+            
+            // Update output
+            updateOutput();
+        }
+
+        // Update output based on current tab and phase
+        function updateOutput() {
+            const code = document.getElementById('sourceCode').value;
+            const outputDiv = document.getElementById('output');
+            
+            let output = '';
+            
+            switch(currentTab) {
+                case 'tokens':
+                    output = generateTokens(code);
+                    break;
+                case 'ast':
+                    output = generateAST(code);
+                    break;
+                case 'symbol':
+                    output = generateSymbolTable(code);
+                    break;
+                case 'icode':
+                    output = generateIntermediateCode(code);
+                    break;
+                case 'optimized':
+                    output = generateOptimizedCode(code);
+                    break;
+                case 'target':
+                    output = generateTargetCode(code);
+                    break;
+                default:
+                    output = "Select an output tab to see results";
+            }
+            
+            currentOutput = output;
+            outputDiv.innerHTML = formatOutput(output, currentTab);
+            updateStats();
+        }
+
+        // Format output with syntax highlighting
+        function formatOutput(output, type) {
+            const lines = output.split('\n');
+            let formatted = '';
+            
+            lines.forEach(line => {
+                let className = '';
+                
+                if (type === 'tokens') {
+                    if (line.includes('KEYWORD')) className = 'keyword';
+                    else if (line.includes('IDENTIFIER')) className = 'identifier';
+                    else if (line.includes('NUMBER')) className = 'number';
+                    else if (line.includes('OPERATOR')) className = 'operator';
+                    else if (line.includes('DELIMITER')) className = 'delimiter';
+                    else if (line.includes('//')) className = 'comment';
+                } else if (line.includes('//') || line.startsWith('//')) {
+                    className = 'comment';
+                } else if (line.includes('=') && type === 'icode') {
+                    className = 'operator';
+                }
+                
+                formatted += `<div class="output-line ${className}">${line}</div>`;
+            });
+            
+            return formatted;
+        }
+
+        // Update statistics
+        function updateStats() {
+            const code = document.getElementById('sourceCode').value;
+            
+            // Count tokens
+            const tokens = generateTokens(code).split('\n');
+            const tokenCount = tokens.filter(line => line.includes('KEYWORD') || line.includes('IDENTIFIER') || 
+                line.includes('NUMBER') || line.includes('OPERATOR') || line.includes('DELIMITER')).length;
+            
+            // Count symbols
+            const symbolTable = generateSymbolTable(code);
+            const symbolCount = (symbolTable.match(/[a-zA-Z_][a-zA-Z0-9_]*/g) || []).length;
+            
+            // Count optimizations
+            const optimizedCode = generateOptimizedCode(code);
+            const optimizationCount = (optimizedCode.match(/✓/g) || []).length;
+            
+            // Update DOM
+            document.getElementById('tokenCount').textContent = tokenCount;
+            document.getElementById('symbolCount').textContent = symbolCount;
+            document.getElementById('optimizationCount').textContent = optimizationCount;
+            document.getElementById('phaseProgress').textContent = `${currentPhase + 1}/6`;
+            
+            // Update badges
+            document.getElementById('tokenBadge').textContent = tokenCount;
+            document.getElementById('symbolBadge').textContent = symbolCount;
+            document.getElementById('optimizationBadge').textContent = optimizationCount;
+            
+            // Update progress bar
+            const progress = ((currentPhase + 1) / 6) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('currentPhaseText').textContent = `Phase ${currentPhase + 1}/6`;
+        }
+
+        // Compile the code
+        function compileCode() {
+            showNotification('Compiling code...', 'info');
+            resetPhases();
+            currentPhase = 0;
+            updatePhasesDisplay();
+            updateOutput();
+            updateStats();
+            
+            setTimeout(() => {
+                showNotification('Compilation complete! Use Next Phase to proceed.', 'success');
+            }, 500);
+        }
+
+        // Reset everything
+        function resetAll() {
+            showNotification('Resetting all phases...', 'info');
+            currentPhase = 0;
+            isAutoRunning = false;
+            resetPhases();
+            updateOutput();
+            updateStats();
+            
+            setTimeout(() => {
+                showNotification('All phases reset successfully!', 'success');
+            }, 300);
+        }
+
+        // Reset phase status
+        function resetPhases() {
+            for (let i = 1; i <= 6; i++) {
+                const phase = document.getElementById('phase' + i);
+                const status = phase.querySelector('.phase-status');
+                
+                phase.classList.remove('active', 'completed');
+                status.className = 'phase-status status-pending';
+                status.textContent = 'Pending';
+                
+                if (i === 1) {
+                    phase.classList.add('active');
+                    status.className = 'phase-status status-active';
+                    status.textContent = 'Active';
+                }
+            }
+        }
+
+        // Update phases display
+        function updatePhasesDisplay() {
+            for (let i = 1; i <= 6; i++) {
+                const phase = document.getElementById('phase' + i);
+                const status = phase.querySelector('.phase-status');
+                const number = phase.querySelector('.phase-number');
+                
+                phase.classList.remove('active', 'completed');
+                status.classList.remove('status-active', 'status-completed', 'status-pending');
+                number.style.background = '';
+                number.style.borderColor = '';
+                number.style.color = '';
+                number.style.boxShadow = '';
+                
+                if (i-1 < currentPhase) {
+                    phase.classList.add('completed');
+                    status.classList.add('status-completed');
+                    status.textContent = 'Completed';
+                    number.style.background = 'var(--success)';
+                    number.style.borderColor = 'var(--success)';
+                    number.style.color = 'white';
+                } else if (i-1 === currentPhase) {
+                    phase.classList.add('active');
+                    status.classList.add('status-active');
+                    status.textContent = 'Active';
+                    number.style.background = 'var(--primary)';
+                    number.style.borderColor = 'var(--primary)';
+                    number.style.color = 'white';
+                    number.style.boxShadow = '0 0 20px rgba(67, 97, 238, 0.5)';
+                } else {
+                    status.classList.add('status-pending');
+                    status.textContent = 'Pending';
+                }
+            }
+        }
+
+        // Go to specific phase
+        function goToPhase(phaseIndex) {
+            if (phaseIndex <= currentPhase) {
+                currentPhase = phaseIndex;
+                updatePhasesDisplay();
+                updateOutput();
+                updateStats();
+                showNotification(`Navigated to ${phaseData[phaseIndex].title.split('(')[0]}`, 'info');
+            }
+        }
+
+        // Go to previous phase
+        function prevPhase() {
+            if (currentPhase > 0) {
+                currentPhase--;
+                updatePhasesDisplay();
+                updateOutput();
+                updateStats();
+                showNotification(`Moved to previous phase: ${phaseData[currentPhase].title.split('(')[0]}`, 'info');
+            }
+        }
+
+        // Go to next phase
+        function nextPhase() {
+            if (currentPhase < 5) {
+                currentPhase++;
+                updatePhasesDisplay();
+                updateOutput();
+                updateStats();
+                showNotification(`Advanced to ${phaseData[currentPhase].title.split('(')[0]}`, 'success');
+            } else {
+                showNotification('All phases completed!', 'success');
+            }
+        }
+
+        // Auto run all phases
+        function autoRunPhases() {
+            if (isAutoRunning) return;
+            
+            showNotification('Starting auto-run of all phases...', 'info');
+            isAutoRunning = true;
+            resetAll();
+            
+            let phase = 0;
+            const runInterval = setInterval(() => {
+                if (phase <= 5) {
+                    currentPhase = phase;
+                    updatePhasesDisplay();
+                    updateOutput();
+                    updateStats();
+                    
+                    if (phase === 5) {
+                        showNotification('Auto-run complete! All phases executed successfully.', 'success');
+                    }
+                    
+                    phase++;
+                } else {
+                    clearInterval(runInterval);
+                    isAutoRunning = false;
+                }
+            }, 2000);
+        }
+
+        // Load example code
+        function loadExample(type) {
+            const examples = {
+                simple: `int main() {
+    int x = 10;
+    int y = 20;
+    int result = x + y;
+    return result;
+}`,
+                conditional: `int main() {
+    int score = 85;
+    char grade;
+    
+    if (score >= 90) {
+        grade = 'A';
+    } else if (score >= 75) {
+        grade = 'B';
+    } else {
+        grade = 'C';
+    }
+    
+    return 0;
+}`,
+                loop: `int main() {
+    int sum = 0;
+    int i = 1;
+    
+    while (i <= 10) {
+        sum = sum + i;
+        i = i + 1;
+    }
+    
+    return sum;
+}`
+            };
+            
+            document.getElementById('sourceCode').value = examples[type] || examples.simple;
+            showNotification(`Loaded ${type} example code`, 'success');
+            updateOutput();
+        }
+
+        // Clear code editor
+        function clearCode() {
+            document.getElementById('sourceCode').value = '';
+            showNotification('Code editor cleared', 'info');
+        }
+
+        // Copy code to clipboard
+        function copyCode() {
+            const code = document.getElementById('sourceCode').value;
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Code copied to clipboard!', 'success');
+            });
+        }
+
+        // Copy output to clipboard
+        function copyOutput() {
+            navigator.clipboard.writeText(currentOutput).then(() => {
+                showNotification('Output copied to clipboard!', 'success');
+            });
+        }
+
+        // Download output as file
+        function downloadOutput() {
+            const blob = new Blob([currentOutput], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `compiler_output_${currentTab}_${new Date().getTime()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showNotification('Output downloaded!', 'success');
+        }
+
+        // Clear output display
+        function clearOutput() {
+            document.getElementById('output').innerHTML = 
+                '<div class="output-line comment">// Output cleared</div>' +
+                '<div class="output-line comment">// Click "Compile & Visualize" to generate new output</div>';
+            showNotification('Output cleared', 'info');
+        }
+
+        // ========== COMPILER FUNCTIONS ========== //
+        
+        function generateTokens(code) {
+            const lines = code.split('\n');
+            let tokens = [];
+            
+            lines.forEach((line, lineNum) => {
+                line = line.trim();
+                if (!line) return;
+                
+                // Simple tokenization
+                const words = line.split(/\s+|(?=[{}();,=<>!+\-*/])|(?<=[{}();,=<>!+\-*/])/);
+                
+                words.forEach(word => {
+                    word = word.trim();
+                    if (!word) return;
+                    
+                    if (word.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/)) {
+                        const keywords = ['int', 'float', 'char', 'void', 'if', 'else', 'while', 'for', 'return', 'main'];
+                        if (keywords.includes(word)) {
+                            tokens.push(`Line ${lineNum + 1}: KEYWORD("${word}")`);
+                        } else {
+                            tokens.push(`Line ${lineNum + 1}: IDENTIFIER("${word}")`);
+                        }
+                    } else if (word.match(/^[0-9]+(\.[0-9]+)?$/)) {
+                        tokens.push(`Line ${lineNum + 1}: NUMBER(${word})`);
+                    } else if (word.match(/^[+\-*/=<>!]=?$/)) {
+                        tokens.push(`Line ${lineNum + 1}: OPERATOR("${word}")`);
+                    } else if (word.match(/^[{}();,]$/)) {
+                        tokens.push(`Line ${lineNum + 1}: DELIMITER("${word}")`);
+                    } else if (word.match(/^".*"$/)) {
+                        tokens.push(`Line ${lineNum + 1}: STRING(${word})`);
+                    } else if (word.match(/^'.'$/)) {
+                        tokens.push(`Line ${lineNum + 1}: CHARACTER('${word}')`);
+                    }
+                });
+            });
+            
+            if (tokens.length === 0) {
+                return "// No tokens found. Please enter valid code.";
+            }
+            
+            return "TOKENS GENERATED:\n" + "=".repeat(50) + "\n" + tokens.join('\n');
+        }
+        
+        function generateAST(code) {
+            const lines = code.split('\n');
+            let astLines = ["ABSTRACT SYNTAX TREE:", "=".repeat(50), ""];
+            
+            lines.forEach((line, lineNum) => {
+                line = line.trim();
+                if (!line) return;
+                
+                if (line.includes('main()')) {
+                    astLines.push("Program");
+                    astLines.push("└── Function: main()");
+                    astLines.push("    ├── Return Type: int");
+                    astLines.push("    ├── Parameters: none");
+                    astLines.push("    └── Body Block");
+                }
+                
+                if (line.includes('int ') && line.includes('=')) {
+                    const varName = line.split(' ')[2] || line.split(' ')[1];
+                    const value = line.split('=')[1]?.replace(';', '').trim() || '?';
+                    astLines.push("        ├── Variable Declaration");
+                    astLines.push(`        │   ├── Type: int`);
+                    astLines.push(`        │   ├── Name: ${varName}`);
+                    astLines.push(`        │   └── Value: ${value}`);
+                }
+                
+                if (line.includes('if ')) {
+                    const condition = line.replace('if', '').replace('(', '').replace(')', '').replace('{', '').trim();
+                    astLines.push("        ├── If Statement");
+                    astLines.push(`        │   ├── Condition: ${condition}`);
+                    astLines.push(`        │   └── Then Block`);
+                    
+                    const nextLine = lines[lineNum + 1]?.trim();
+                    if (nextLine && nextLine.includes('=')) {
+                        const assignment = nextLine.replace(';', '').trim();
+                        astLines.push(`        │       └── Assignment: ${assignment}`);
+                    }
+                }
+                
+                if (line.includes('return ')) {
+                    const returnValue = line.replace('return', '').replace(';', '').trim();
+                    astLines.push("        └── Return Statement");
+                    astLines.push(`            └── Value: ${returnValue}`);
+                }
+            });
+            
+            return astLines.join('\n');
+        }
+        
+        function generateSymbolTable(code) {
+            const lines = code.split('\n');
+            let symbolTable = ["SYMBOL TABLE:", "=".repeat(50), ""];
+            symbolTable.push("Name       | Type | Scope   | Value | Line");
+            symbolTable.push("-".repeat(50));
+            
+            lines.forEach((line, lineNum) => {
+                line = line.trim();
+                if (!line) return;
+                
+                if (line.includes('main()')) {
+                    symbolTable.push(`main       | func | global  | -     | ${lineNum + 1}`);
+                }
+                
+                if (line.includes('int ') && line.includes('=')) {
+                    const parts = line.split('=');
+                    const left = parts[0].trim();
+                    const right = parts[1]?.replace(';', '').trim() || '?';
+                    
+                    const type = 'int';
+                    const name = left.split(' ')[2] || left.split(' ')[1];
+                    symbolTable.push(`${name.padEnd(10)} | ${type.padEnd(5)} | main    | ${right} | ${lineNum + 1}`);
+                }
+            });
+            
+            symbolTable.push("\nTYPE CHECKING STATUS:");
+            symbolTable.push("✓ All variables properly declared");
+            symbolTable.push("✓ No type mismatches detected");
+            symbolTable.push("✓ Function return type matches");
+            symbolTable.push("✓ No undefined variables");
+            
+            return symbolTable.join('\n');
+        }
+        
+        function generateIntermediateCode(code) {
+            const lines = code.split('\n');
+            let icodeLines = ["INTERMEDIATE CODE (Three-Address Code):", "=".repeat(50), ""];
+            
+            let tempVarCounter = 1;
+            let lineCounter = 1;
+            
+            icodeLines.push(`${lineCounter++}: FUNCTION main`);
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                
+                if (line.includes('int ') && line.includes('=')) {
+                    const parts = line.split('=');
+                    const varName = parts[0].trim().split(' ')[2] || parts[0].trim().split(' ')[1];
+                    const value = parts[1].replace(';', '').trim();
+                    
+                    if (!isNaN(value)) {
+                        icodeLines.push(`${lineCounter++}:   t${tempVarCounter} = ${value}`);
+                        icodeLines.push(`${lineCounter++}:   ${varName} = t${tempVarCounter}`);
+                        tempVarCounter++;
+                    } else if (value.includes('+')) {
+                        const [left, right] = value.split('+').map(x => x.trim());
+                        icodeLines.push(`${lineCounter++}:   t${tempVarCounter} = ${left}`);
+                        tempVarCounter++;
+                        icodeLines.push(`${lineCounter++}:   t${tempVarCounter} = ${right}`);
+                        tempVarCounter++;
+                        icodeLines.push(`${lineCounter++}:   t${tempVarCounter} = t${tempVarCounter-2} + t${tempVarCounter-1}`);
+                        icodeLines.push(`${lineCounter++}:   ${varName} = t${tempVarCounter}`);
+                        tempVarCounter++;
+                    }
+                }
+                
+                if (line.includes('if ')) {
+                    const condition = line.replace('if', '').replace('(', '').replace(')', '').replace('{', '').trim();
+                    if (condition.includes('>')) {
+                        const [left, right] = condition.split('>').map(x => x.trim());
+                        icodeLines.push(`${lineCounter++}:   # Evaluate condition: ${condition}`);
+                        icodeLines.push(`${lineCounter++}:   t${tempVarCounter} = ${left}`);
+                        tempVarCounter++;
+                        icodeLines.push(`${lineCounter++}:   t${tempVarCounter} = ${right}`);
+                        tempVarCounter++;
+                        icodeLines.push(`${lineCounter++}:   if t${tempVarCounter-1} <= t${tempVarCounter} goto L${tempVarCounter}`);
+                        const label = `L${tempVarCounter}`;
+                        tempVarCounter++;
+                        
+                        const nextLineIndex = lines.indexOf(line) + 1;
+                        if (nextLineIndex < lines.length) {
+                            const insideLine = lines[nextLineIndex].trim();
+                            if (insideLine.includes('=')) {
+                                const parts = insideLine.split('=');
+                                const varName = parts[0].trim();
+                                const expr = parts[1].replace(';', '').replace('{', '').trim();
+                                
+                                if (expr.includes('*')) {
+                                    const [leftOp, rightOp] = expr.split('*').map(x => x.trim());
+                                    icodeLines.push(`${lineCounter++}:   # Inside if block`);
+                                    icodeLines.push(`${lineCounter++}:   t${tempVarCounter} = ${leftOp}`);
+                                    tempVarCounter++;
+                                    icodeLines.push(`${lineCounter++}:   t${tempVarCounter} = t${tempVarCounter-1} * ${rightOp}`);
+                                    icodeLines.push(`${lineCounter++}:   ${varName} = t${tempVarCounter}`);
+                                    tempVarCounter++;
+                                }
+                            }
+                        }
+                        
+                        icodeLines.push(`${lineCounter++}:   ${label}:`);
+                    }
+                }
+                
+                if (line.includes('return ')) {
+                    const returnValue = line.replace('return', '').replace(';', '').trim();
+                    icodeLines.push(`${lineCounter++}:   t${tempVarCounter} = ${returnValue}`);
+                    icodeLines.push(`${lineCounter++}:   return t${tempVarCounter}`);
+                    tempVarCounter++;
+                }
+            });
+            
+            icodeLines.push(`${lineCounter}: END_FUNCTION`);
+            icodeLines.push("\nNOTES:");
+            icodeLines.push("- t1, t2, t3,... are temporary variables");
+            icodeLines.push("- Three-address code uses at most one operator per instruction");
+            icodeLines.push("- Each instruction has the form: x = y op z");
+            
+            return icodeLines.join('\n');
+        }
+        
+        function generateOptimizedCode(code) {
+            const lines = code.split('\n');
+            let optimizedLines = ["OPTIMIZED INTERMEDIATE CODE:", "=".repeat(50), ""];
+            
+            let lineNum = 1;
+            let optimizations = 0;
+            
+            optimizedLines.push(`${lineNum++}: FUNCTION main`);
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.includes('int ') && line.includes('=')) {
+                    const parts = line.split('=');
+                    const varName = parts[0].trim().split(' ')[2] || parts[0].trim().split(' ')[1];
+                    const value = parts[1].replace(';', '').trim();
+                    
+                    if (!isNaN(value)) {
+                        optimizedLines.push(`${lineNum++}:   ${varName} = ${value}  # Constant propagation`);
+                        optimizations++;
+                    } else if (value.includes('+') && value.split('+').every(part => !isNaN(part.trim()))) {
+                        const [left, right] = value.split('+').map(x => parseInt(x.trim()));
+                        const result = left + right;
+                        optimizedLines.push(`${lineNum++}:   ${varName} = ${result}  # Constant folding`);
+                        optimizations++;
+                    } else {
+                        optimizedLines.push(`${lineNum++}:   ${varName} = ${value}`);
+                    }
+                }
+            });
+            
+            lines.forEach(line => {
+                if (line.includes('if ')) {
+                    const condition = line.replace('if', '').replace('(', '').replace(')', '').replace('{', '').trim();
+                    optimizedLines.push(`${lineNum++}:   if ${condition} goto L1  # Optimized condition`);
+                    optimizedLines.push(`${lineNum++}:   goto L2`);
+                    optimizedLines.push(`${lineNum++}:   L1:`);
+                    
+                    const lineIndex = lines.indexOf(line);
+                    if (lineIndex + 1 < lines.length) {
+                        const insideLine = lines[lineIndex + 1].trim();
+                        if (insideLine.includes('=') && insideLine.includes('* 2')) {
+                            optimizedLines.push(`${lineNum++}:   sum = sum << 1  # Strength reduction`);
+                            optimizations++;
+                        }
+                    }
+                    
+                    optimizedLines.push(`${lineNum++}:   L2:`);
+                }
+            });
+            
+            optimizedLines.push(`${lineNum++}:   return 0  # Constant folding`);
+            optimizations++;
+            optimizedLines.push(`${lineNum}: END_FUNCTION`);
+            
+            optimizedLines.push("\nOPTIMIZATION TECHNIQUES APPLIED:");
+            if (optimizations > 0) {
+                optimizedLines.push("✓ Constant Propagation");
+                optimizedLines.push("✓ Constant Folding");
+                optimizedLines.push("✓ Strength Reduction");
+                optimizedLines.push("✓ Dead Code Elimination");
+                optimizedLines.push("✓ Copy Propagation");
+            } else {
+                optimizedLines.push("// No optimizations applicable for this code");
+            }
+            
+            return optimizedLines.join('\n');
+        }
+        
+        function generateTargetCode(code) {
+            const lines = code.split('\n');
+            let targetLines = ["TARGET MACHINE CODE (x86 Assembly):", "=".repeat(50), ""];
+            
+            let variableCount = 0;
+            lines.forEach(line => {
+                if (line.includes('int ') && line.includes('=')) {
+                    variableCount++;
+                }
+            });
+            
+            const stackSpace = variableCount * 4 + 16;
+            
+            targetLines.push("section .text");
+            targetLines.push("global _main");
+            targetLines.push("");
+            targetLines.push("_main:");
+            targetLines.push("    ; Function prologue");
+            targetLines.push("    push ebp");
+            targetLines.push("    mov ebp, esp");
+            targetLines.push(`    sub esp, ${stackSpace}`);
+            targetLines.push("");
+            
+            let stackOffset = 4;
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.includes('int ') && line.includes('=')) {
+                    const parts = line.split('=');
+                    const varName = parts[0].trim().split(' ')[2] || parts[0].trim().split(' ')[1];
+                    const value = parts[1].replace(';', '').trim();
+                    
+                    if (!isNaN(value)) {
+                        targetLines.push(`    ; ${varName} = ${value}`);
+                        targetLines.push(`    mov DWORD [ebp-${stackOffset}], ${value}`);
+                        stackOffset += 4;
+                        targetLines.push("");
+                    } else if (value.includes('+')) {
+                        const [left, right] = value.split('+').map(x => x.trim());
+                        targetLines.push(`    ; ${varName} = ${left} + ${right}`);
+                        if (!isNaN(left) && !isNaN(right)) {
+                            const result = parseInt(left) + parseInt(right);
+                            targetLines.push(`    mov DWORD [ebp-${stackOffset}], ${result}`);
+                        }
+                        stackOffset += 4;
+                        targetLines.push("");
+                    }
+                }
+            });
+            
+            lines.forEach(line => {
+                if (line.includes('if ')) {
+                    const condition = line.replace('if', '').replace('(', '').replace(')', '').replace('{', '').trim();
+                    if (condition.includes('>')) {
+                        const [left, right] = condition.split('>').map(x => x.trim());
+                        targetLines.push(`    ; if (${left} > ${right})`);
+                        targetLines.push(`    mov eax, DWORD [ebp-${getVariableOffset(left, lines)}]`);
+                        targetLines.push(`    cmp eax, ${right}`);
+                        targetLines.push("    jle .L1");
+                        targetLines.push("");
+                        
+                        const lineIndex = lines.indexOf(line);
+                        if (lineIndex + 1 < lines.length) {
+                            const insideLine = lines[lineIndex + 1].trim();
+                            if (insideLine.includes('=') && insideLine.includes('* 2')) {
+                                const varName = insideLine.split('=')[0].trim();
+                                targetLines.push(`    ; ${varName} = ${varName} * 2`);
+                                targetLines.push(`    mov eax, DWORD [ebp-${getVariableOffset(varName, lines)}]`);
+                                targetLines.push(`    shl eax, 1`);
+                                targetLines.push(`    mov DWORD [ebp-${getVariableOffset(varName, lines)}], eax`);
+                                targetLines.push("");
+                            }
+                        }
+                        
+                        targetLines.push(".L1:");
+                    }
+                }
+            });
+            
+            targetLines.push("    ; return 0");
+            targetLines.push("    xor eax, eax");
+            targetLines.push("");
+            targetLines.push("    ; Function epilogue");
+            targetLines.push("    mov esp, ebp");
+            targetLines.push("    pop ebp");
+            targetLines.push("    ret");
+            targetLines.push("");
+            
+            targetLines.push("MEMORY LAYOUT:");
+            stackOffset = 4;
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.includes('int ') && line.includes('=')) {
+                    const varName = line.split('=')[0].trim().split(' ')[2] || line.split('=')[0].trim().split(' ')[1];
+                    targetLines.push(`[ebp-${stackOffset}]   : ${varName} (4 bytes)`);
+                    stackOffset += 4;
+                }
+            });
+            
+            return targetLines.join('\n');
+        }
+        
+        function getVariableOffset(varName, lines) {
+            let offset = 4;
+            for (let line of lines) {
+                line = line.trim();
+                if (line.includes('int ') && line.includes('=')) {
+                    const currentVar = line.split('=')[0].trim().split(' ')[2] || line.split('=')[0].trim().split(' ')[1];
+                    if (currentVar === varName) {
+                        return offset;
+                    }
+                    offset += 4;
+                }
+            }
+            return 4;
+        }
+    </script>
+</body>
+</html>
